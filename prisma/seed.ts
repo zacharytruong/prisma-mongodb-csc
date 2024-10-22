@@ -70,7 +70,7 @@ async function main() {
   for (const country of countries) {
     const region = country.region
       ? await prisma.region.findUnique({
-          where: { name: String(country.region) }
+          where: { name: country.region }
         })
       : null
     const subregion = country.subregion
