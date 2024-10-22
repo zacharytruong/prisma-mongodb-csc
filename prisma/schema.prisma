@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Region {
+  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  name         String      @unique
+  translations Json?
+  wikiDataId   String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  countries    Country[]
+  subregions   Subregion[]
+
+  @@map("regions")
+}
+
+model Subregion {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  name         String    @unique
+  translations Json?
+  wikiDataId   String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  regionId     String    @db.ObjectId
+  region       Region    @relation(fields: [regionId], references: [id])
+  countries    Country[]
+
+  @@index([regionId])
+  @@map("subregions")
+}
+
+model Country {
+  id                String     @id @default(auto()) @map("_id") @db.ObjectId
+  name              String
+  iso3              String     @unique
+  iso2              String     @unique
+  numericCode       String?
+  phoneCode         String?
+  capital           String?
+  currency          String?
+  currencyName      String?
+  currencySymbol    String?
+  tld               String?
+  native            String?
+  region            String?
+  subregion         String?
+  latitude          Float?
+  longitude         Float?
+  emoji             String?
+  emojiU            String?
+  timezones         Json?
+  translations      Json?
+  wikiDataId        String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  regionId          String?    @db.ObjectId
+  regionRelation    Region?    @relation(fields: [regionId], references: [id])
+  subregionId       String?    @db.ObjectId
+  subregionRelation Subregion? @relation(fields: [subregionId], references: [id])
+  states            State[]
+  cities            City[]
+
+  @@index([regionId])
+  @@index([subregionId])
+  @@map("countries")
+}
+
+model State {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  countryCode String
+  fipsCode    String?
+  iso2        String?
+  type        String?
+  latitude    Float?
+  longitude   Float?
+  wikiDataId  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  country     Country  @relation(fields: [countryId], references: [id])
+  countryId   String   @db.ObjectId
+  cities      City[]
+
+  @@index([countryId])
+  @@map("states")
+}
+
+model City {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  stateCode   String
+  countryCode String
+  latitude    Float
+  longitude   Float
+  wikiDataId  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  stateId     String   @db.ObjectId
+  state       State    @relation(fields: [stateId], references: [id])
+  countryId   String   @db.ObjectId
+  country     Country  @relation(fields: [countryId], references: [id])
+
+  @@index([stateId])
+  @@index([countryId])
+  @@map("cities")
+}
