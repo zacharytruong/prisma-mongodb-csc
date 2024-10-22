@@ -24,7 +24,7 @@ async function main() {
   for (const region of regions) {
     await prisma.region.upsert({
       where: {
-        name: region.name
+        name: String(region.name)
       },
       update: {},
       create: {
@@ -48,7 +48,7 @@ async function main() {
       if (region) {
         await prisma.subregion.upsert({
           where: {
-            name: subregion.name
+            name: String(subregion.name)
           },
           update: {},
           create: {
@@ -70,17 +70,17 @@ async function main() {
   for (const country of countries) {
     const region = country.region
       ? await prisma.region.findUnique({
-          where: { name: country.region }
+          where: { name: String(country.region) }
         })
       : null
     const subregion = country.subregion
       ? await prisma.subregion.findUnique({
-          where: { name: country.subregion }
+          where: { name: String(country.subregion) }
         })
       : null
     await prisma.country.upsert({
       where: {
-        id: country.id
+        id: String(country.id)
       },
       update: {},
       create: {
@@ -117,11 +117,11 @@ async function main() {
   const states = (await fetchData('states')) as State[]
   for (const state of states) {
     const country = await prisma.country.findUnique({
-      where: { iso2: state.country_code }
+      where: { iso2: String(state.country_code) }
     })
     if (country) {
       await prisma.state.upsert({
-        where: { id: state.id },
+        where: { id: String(state.id) },
         update: {},
         create: {
           name: state.name,
@@ -156,7 +156,7 @@ async function main() {
     if (state && country) {
       await prisma.city.upsert({
         where: {
-          id: city.id
+          id: String(city.id)
         },
         update: {},
         create: {
