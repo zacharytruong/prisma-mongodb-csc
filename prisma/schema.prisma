@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Region {
-  id           String      @id @default(auto()) @map("_id") @db.ObjectId
+  id           String      @id @default(uuid()) @map("_id")
   name         String      @unique
   translations Json?
   wikiDataId   String?
@@ -21,13 +21,13 @@ model Region {
 }
 
 model Subregion {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  id           String    @id @default(uuid()) @map("_id")
   name         String    @unique
   translations Json?
   wikiDataId   String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-  regionId     String    @db.ObjectId
+  regionId     String
   region       Region    @relation(fields: [regionId], references: [id])
   countries    Country[]
 
@@ -36,7 +36,7 @@ model Subregion {
 }
 
 model Country {
-  id                String     @id @default(auto()) @map("_id") @db.ObjectId
+  id                String     @id @default(uuid()) @map("_id")
   name              String
   iso3              String     @unique
   iso2              String     @unique
@@ -59,9 +59,9 @@ model Country {
   wikiDataId        String?
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
-  regionId          String?    @db.ObjectId
+  regionId          String?
   regionRelation    Region?    @relation(fields: [regionId], references: [id])
-  subregionId       String?    @db.ObjectId
+  subregionId       String?
   subregionRelation Subregion? @relation(fields: [subregionId], references: [id])
   states            State[]
   cities            City[]
@@ -72,7 +72,7 @@ model Country {
 }
 
 model State {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(uuid()) @map("_id")
   name        String
   countryCode String
   fipsCode    String?
@@ -84,7 +84,7 @@ model State {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   country     Country  @relation(fields: [countryId], references: [id])
-  countryId   String   @db.ObjectId
+  countryId   String
   cities      City[]
 
   @@index([countryId])
@@ -92,7 +92,7 @@ model State {
 }
 
 model City {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  id          String   @id @default(uuid()) @map("_id")
   name        String
   stateCode   String
   countryCode String
@@ -101,9 +101,9 @@ model City {
   wikiDataId  String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  stateId     String   @db.ObjectId
+  stateId     String
   state       State    @relation(fields: [stateId], references: [id])
-  countryId   String   @db.ObjectId
+  countryId   String
   country     Country  @relation(fields: [countryId], references: [id])
 
   @@index([stateId])
