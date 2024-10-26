@@ -7,6 +7,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id    String @id @map("_id")
+  name  String
+  email String @unique
+  pets  Pet[]
+}
+
+model Pet {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  images      String[]
+  age         Int
+  description String
+  gender      String
+  breed       String
+  locationId  String      @db.ObjectId
+  location    PetLocation @relation(fields: [locationId], references: [id])
+  ownerId     String
+  owner       User        @relation(fields: [ownerId], references: [id])
+
+  @@index([breed])
+  @@index([gender])
+  @@index([locationId])
+}
+
+model PetLocation {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  pets      Pet[]
+  stateId   String
+  state     State   @relation(fields: [stateId], references: [id])
+  cityId    String
+  city      City    @relation(fields: [cityId], references: [id])
+  countryId String
+  country   Country @relation(fields: [countryId], references: [id])
+}
+
 model Region {
   id           String      @id @default(uuid()) @map("_id")
   name         String      @unique
@@ -16,8 +52,6 @@ model Region {
   updatedAt    DateTime    @updatedAt
   countries    Country[]
   subregions   Subregion[]
-
-  @@map("regions")
 }
 
 model Subregion {
@@ -30,16 +64,13 @@ model Subregion {
   regionId     String
   region       Region    @relation(fields: [regionId], references: [id])
   countries    Country[]
-
-  @@index([regionId])
-  @@map("subregions")
 }
 
 model Country {
-  id                String     @id @default(uuid()) @map("_id")
+  id                String        @id @default(uuid()) @map("_id")
   name              String
-  iso3              String     @unique
-  iso2              String     @unique
+  iso3              String        @unique
+  iso2              String        @unique
   numericCode       String?
   phoneCode         String?
   capital           String?
@@ -57,22 +88,19 @@ model Country {
   timezones         Json?
   translations      Json?
   wikiDataId        String?
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
   regionId          String?
-  regionRelation    Region?    @relation(fields: [regionId], references: [id])
+  regionRelation    Region?       @relation(fields: [regionId], references: [id])
   subregionId       String?
-  subregionRelation Subregion? @relation(fields: [subregionId], references: [id])
+  subregionRelation Subregion?    @relation(fields: [subregionId], references: [id])
   states            State[]
   cities            City[]
-
-  @@index([regionId])
-  @@index([subregionId])
-  @@map("countries")
+  PetLocation       PetLocation[]
 }
 
 model State {
-  id          String   @id @default(uuid()) @map("_id")
+  id          String        @id @default(uuid()) @map("_id")
   name        String
   countryCode String
   fipsCode    String?
@@ -81,32 +109,32 @@ model State {
   latitude    Float?
   longitude   Float?
   wikiDataId  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  country     Country  @relation(fields: [countryId], references: [id])
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  country     Country       @relation(fields: [countryId], references: [id])
   countryId   String
   cities      City[]
+  PetLocation PetLocation[]
 
   @@index([countryId])
-  @@map("states")
 }
 
 model City {
-  id          String   @id @default(uuid()) @map("_id")
+  id          String        @id @default(uuid()) @map("_id")
   name        String
   stateCode   String
   countryCode String
   latitude    Float
   longitude   Float
   wikiDataId  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   stateId     String
-  state       State    @relation(fields: [stateId], references: [id])
+  state       State         @relation(fields: [stateId], references: [id])
   countryId   String
-  country     Country  @relation(fields: [countryId], references: [id])
+  country     Country       @relation(fields: [countryId], references: [id])
+  PetLocation PetLocation[]
 
   @@index([stateId])
   @@index([countryId])
-  @@map("cities")
 }
